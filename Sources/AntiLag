@@ -1,3 +1,5 @@
+wait(15)
+
 local decalsyeeted = true
 local g = game
 local w = g.Workspace
@@ -36,4 +38,4 @@ for i, e in pairs(l:GetChildren()) do
     end
 end
 
-RunService:Set3dRenderingEnabled(false)
+game:GetService("RunService"):Set3dRenderingEnabled(false)
