@@ -8,7 +8,6 @@ local Terrain = game.workspace.Terrain
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer.PlayerGui
 local Character = LocalPlayer.Character
-local Humanoid = Character.Humanoid
 
 local Rod
 for _, v in pairs(Character:GetChildren()) do
@@ -18,7 +17,6 @@ for _, v in pairs(Character:GetChildren()) do
 		break 
 	end
 end
-Humanoid:EquipTool(Rod)
 
 while true do
 	if not PlayerGui:FindFirstChild("shakeui") then
