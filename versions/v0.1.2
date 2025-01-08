@@ -1,0 +1,224 @@
+
+local dec3ptions = {}
+
+function dec3ptions.Main(config)
+  --// Core Variables
+  local Players = game:GetService("Players")
+  local VirtualInputManager = game:GetService("VirtualInputManager")
+  local VirtualUser = game:GetService("VirtualUser")
+  local RunService = game:GetService("RunService")
+  local ReplicatedStorage = game:GetService("ReplicatedStorage")
+  local Workspace = game.Workspace
+  local Lighting = game.Lighting
+  local Terrain = Workspace.Terrain
+
+  local LocalPlayer = Players.LocalPlayer
+  local Character = LocalPlayer.Character
+  local HumanoidRootPart = Character.HumanoidRootPart
+  local PlayerGui = LocalPlayer:FindFirstChild("PlayerGui")
+  --\\
+
+  --// Main
+  if config.TeleportLocation ~= nil then
+		if config.TeleportLocation == "Brine pool" then
+			HumanoidRootPart.CFrame = CFrame.new(-1795.0086669921875, -142.69314575195312, -3442.02197265625)
+		elseif config.TeleportLocation == "The depths" then
+			HumanoidRootPart.CFrame = CFrame.new(991.2469482421875, -737.9736328125, 1465.3486328125)
+		end
+		wait(3)
+	end
+	if config.FreezeCharacter then
+		local f_force = 999999
+		local BodyPos = Instance.new("BodyPosition", HumanoidRootPart)
+		BodyPos.Position = HumanoidRootPart.Position 
+		BodyPos.P = f_force 
+		BodyPos.MaxForce = Vector3.new(f_force, f_force*workspace.Gravity, f_force)
+		BodyPos.Name = "PositionAnchor"
+	
+		local BodyRot = Instance.new("BodyGyro", HumanoidRootPart)
+		BodyRot.P = f_force 
+		BodyRot.CFrame = HumanoidRootPart.CFrame
+		BodyRot.MaxTorque = Vector3.new(f_force, f_force*workspace.Gravity, f_force)
+		BodyRot.Name = "RotationAnchor"
+	end
+
+	Terrain.WaterWaveSize = 0
+	Terrain.WaterWaveSpeed = 0
+	Terrain.WaterReflectance = 0
+	Terrain.WaterTransparency = 0
+	Lighting.GlobalShadows = ShadowsEnabled
+	Lighting.FogEnd = 9e9
+	Lighting.Brightness = 0
+	for _, v in pairs(game:GetDescendants()) do
+		if v:IsA("Part") or v:IsA("Union") or v:IsA("CornerWedgePart") or v:IsA("TrussPart") then
+			v.Material = "Plastic"
+			v.Reflectance = 0
+		elseif v:IsA("Decal") or v:IsA("Texture") and not config.DecalsEnabled then
+			v.Transparency = 1
+		elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+			v.Lifetime = NumberRange.new(0)
+		elseif v:IsA("Explosion") then
+			v.BlastPressure = 1
+			v.BlastRadius = 1
+		elseif v:IsA("Fire") or v:IsA("SpotLight") or v:IsA("Smoke") then
+			v.Enabled = false
+		elseif v:IsA("MeshPart") then
+			v.Material = "Plastic"
+			v.Reflectance = 0
+			v.TextureID = 10385902758728957
+		end
+	end
+	for _, v in pairs(Lighting:GetChildren()) do
+		if v:IsA("BlurEffect") or v:IsA("SunRaysEffect") or v:IsA("ColorCorrectionEffect") or v:IsA("BloomEffect") or v:IsA("DepthOfFieldEffect") then
+			v.Enabled = false
+		end
+	end
+	settings().Rendering.QualityLevel = "Level01"
+	if not config.RenderingEnabled then
+		coroutine.wrap(
+			function()
+				while true do
+					RunService:Set3dRenderingEnabled(config.RenderingEnabled)
+					wait(295)
+					RunService:Set3dRenderingEnabled(true)
+					wait(5)
+				end
+			end
+		)()
+	end
+	if config.PerformanceBlackScreen then
+		local ScreenGui = Instance.new("ScreenGui", PlayerGui)
+		ScreenGui.Name = "ScreenGui"
+		ScreenGui.Enabled = true
+		ScreenGui.IgnoreGuiInset = true
+		local Frame = Instance.new("Frame", ScreenGui)
+		Frame.Name = "Frame"
+		Frame.Transparency = 0
+		Frame.BackgroundColor3 = Color3.new(0,0,0)
+		Frame.Size = UDim2.new(1,0,1,0)
+		Frame.Position = UDim2.new(.5,0,.5,0)
+		Frame.AnchorPoint = Vector2.new(.5,.5)
+	end
+
+	local Rod
+	for _, v in pairs(Character:GetChildren()) do
+		if v:IsA("Tool") and v:FindFirstChild("rod/server") and v:FindFirstChild("rod/client") and (v.Name:find("Rod") or v.Name:find("rod")) then
+			Rod = v
+			print("Detected rod:", Rod.Name)
+			break 
+		end
+	end
+	coroutine.wrap(
+		function ()
+			while true do
+				if PlayerGui:FindFirstChild("shakeui") then
+					local shakeui = PlayerGui:FindFirstChild("shakeui")
+					local safezone = shakeui:FindFirstChild("safezone")
+					local button = safezone and safezone:FindFirstChild("button")
+					if button and button.Visible then
+						VirtualInputManager:SendMouseButtonEvent(button.AbsolutePosition.X + button.AbsoluteSize.X / 2, button.AbsolutePosition.Y + button.AbsoluteSize.Y / 2, (1 - 1), true, game, 1)
+						VirtualInputManager:SendMouseButtonEvent(button.AbsolutePosition.X + button.AbsoluteSize.X / 2, button.AbsolutePosition.Y + button.AbsoluteSize.Y / 2, (1 - 1), false, game, 1)
+					end
+					wait(config.AutoShakeDelay)
+				else
+					Rod.events.cast:FireServer(unpack({ [1]=math.random(85, 100), [2]=2 }))
+					ReplicatedStorage:WaitForChild("events"):WaitForChild("reelfinished"):FireServer(unpack({ [1]=100, [2]=true }))
+					wait(0.1)
+				end
+			end
+		end
+	)()
+
+	LocalPlayer.Idled:connect(function()
+		VirtualUser:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+		wait(0.25)
+		VirtualUser:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+	end)
+	
+
+	if config.Webhook ~= nil then
+		local ws_uptime = 0
+		local ws_catches = 0
+		coroutine.wrap(
+			function()
+				while wait(1) do
+					ws_uptime += 1
+				end
+			end
+		)()
+		Rod.values.lure.Changed:Connect(function()
+			if Rod.values.lure.Value == 100 then
+				ws_catches += 1
+			end
+		end)
+
+    local init_data = game:GetService("HttpService"):JSONEncode({
+      ["content"] = nil,
+      ["username"] = "Dec3ptions Hub",
+      ["avatar_url"] = "https://lh3.googleusercontent.com/a/ACg8ocJcVrlcaQ-WeyGGiyUZ2J4KkJIXOc893-rqAoIRBvn2Gpay29rgxUt-2dN_ZhVzF_vQBYKvXMtO0lIf0G9QFViyNd8d4QtM=s288-c-no",
+      ["embeds"] = {{
+        ["title"] = "***Initialised***",
+        ["description"] = "The script has been injected successfully.",
+        ["type"] = "rich",
+				["color"] = tonumber(0x43e1ed),
+        ["footer"] = {["text"] = os.date("%x") .. "    " .. os.date("%I") .. ":".. os.date("%M %p")}
+      }}
+    })
+    local init_request = http_request or request or HttpPost or syn.request
+    local init_request_table = {Url = config.Webhook, Body = init_data, Method = "POST", Headers = { ["content-type"] = "application/json" }}
+    init_request(init_request_table)
+
+		coroutine.wrap(
+			function()
+				while wait(config.WebhookUpdateDelay) do
+					local data = game:GetService("HttpService"):JSONEncode({
+						["content"] = nil,
+						["username"] = "Dec3ptions Hub",
+						["avatar_url"] = "https://lh3.googleusercontent.com/a/ACg8ocJcVrlcaQ-WeyGGiyUZ2J4KkJIXOc893-rqAoIRBvn2Gpay29rgxUt-2dN_ZhVzF_vQBYKvXMtO0lIf0G9QFViyNd8d4QtM=s288-c-no",
+						["embeds"] = {{
+							["title"] = "***Dec3ptions Hub***",
+							["description"] = (
+								"**Player**\n" .. LocalPlayer.Name .. "\nhttps://www.roblox.com/users/" .. LocalPlayer.UserId .. "/profile" .. "\n\n"
+							),
+							["type"] = "rich",
+							["color"] = tonumber(0x43e1ed),
+							["fields"] = {
+								{
+									["name"] = "**C$**",
+									["value"] = "```" .. LocalPlayer:FindFirstChild("leaderstats"):FindFirstChild("C$").Value .. "```",
+									["inline"] = true
+								},
+								{
+									["name"] = "**Level**",
+									["value"] = "```" .. LocalPlayer:FindFirstChild("leaderstats"):FindFirstChild("Level").Value .. "```",
+									["inline"] = true
+								},
+								{
+									["name"] = "**Session**",
+									["value"] = (
+										"Uptime - " .. ws_uptime.. "s" .. "\n" ..
+										"Catches - " .. ws_catches .. "\n" ..
+										"Projection - " .. string.format("%.1f", ws_catches / (ws_uptime / 3600)) .. "/hr" .. "\n" ..
+					
+										"‎"
+										),
+									["inline"] = false
+								}
+							},
+							["footer"] = {
+								["text"] = os.date("%x") .. "    " .. os.date("%I") .. ":".. os.date("%M %p") .. "\nThank you for choosing Dec3ptions Hub\n" .. "https://discord.gg/wsAAgt63uG"
+							}
+						}}
+					})
+					
+					local request = http_request or request or HttpPost or syn.request
+					local request_table = {Url = config.Webhook, Body = data, Method = "POST", Headers = { ["content-type"] = "application/json" }}
+					request(request_table)
+				end
+			end
+		)()
+	end
+  --\\
+end
+  
+return dec3ptions
