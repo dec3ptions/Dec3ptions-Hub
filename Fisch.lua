@@ -12,5 +12,5 @@ local settings = {
     WebhookUpdateDelay = 300  -- Default: 300
 }
 
-local dec3ptions = loadstring(game:HttpGet("https://raw.githubusercontent.com/dec3ptions/Dec3ptions-Hub/refs/heads/hacks/versions/v0.0.4"))()
+local dec3ptions = loadstring(game:HttpGet("https://raw.githubusercontent.com/dec3ptions/Dec3ptions-Hub/refs/heads/hacks/versions/v0.1.2"))()
 dec3ptions.Main(settings)
