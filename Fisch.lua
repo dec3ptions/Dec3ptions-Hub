@@ -14,3 +14,9 @@ local settings = {
 
 local dec3ptions = loadstring(game:HttpGet("https://raw.githubusercontent.com/dec3ptions/Dec3ptions-Hub/refs/heads/main/Versions/v1.0.5"))()
 dec3ptions.Main(settings)
+
+-- Made by Dec3ptions
+
+-- github.com/Dec3ptions
+-- youtube.com/@Dec3ptions
+-- twitch.tv/Dec3ptions
